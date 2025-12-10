@@ -1,13 +1,13 @@
 
 
-Copyright 1992-2025 Le Projet FreeBSD.
+Copyright 1992-2025 The FreeBSD Project.
 
-Redistribution et utilisation dans les formes source et binaire, avec ou sans modification, sont autorisés à condition que les éléments suivants les conditions sont remplies:
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-    Les redistributions de code source doivent conserver le droit d'auteur ci-dessus remarquez, cette liste de conditions et la clause de non-responsabilité suivante.
+    Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-    Les redistributions sous forme binaire doivent reproduire ce qui précède avis de droit d'auteur, cette liste de conditions et les suivantes clause de non-responsabilité dans la documentation et/ou d'autres documents fournis avec la distribution.
+    Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-CE LOGICIEL EST FOURNI PAR L'AUTEUR ET LES CONTRIBUTEURS "TELS QUELS" ET TOUTE GARANTIE EXPRESSE OU IMPLICITE, Y COMPRIS, MAIS PAS LIMITÉE À, LES GARANTIES IMPLICITES DE MARCHANDISABILITÉ ET DE FORME PHYSIQUE POUR UN LES FINS PARTICULIÈRES SONT AVIS DÉCLAQUÉS. EN AUCUN CAS L'AUTEUR OU LES CONTRIBUTEURS SONT RESPONSABLES DE TOUT DIRECT, INDIRECT, ACCESSOIRE, DOMMAGES SPÉCIAUX, EXEMPLAIRES OU CONSÉCUTIFS (Y COMPRIS, MAIS PAS LIMITÉ À, L'ACHAT DE BIENS OU DE SERVICES DE SUBSTITUT; PERTE DE UTILISATION, DONNÉES OU PROFITS; OU INTERRUPTION D'ENTREPRISE) CEPENDANT CAUSÉS ET SUR TOUTE THÉORIE DE LA RESPONSABILITÉ, QUE CE SOIT DANS LE CONTRAT, LA RESPONSABILITÉ STRICTE, OU DÉCLENCHER (Y COMPRIS LA NÉGLIGENCE OU AUTREMENT) DÉCOULANT DE TOUTES LES MANIÈRES DE L'UTILISATION DE CE LOGICIEL, MÊME S'IL EST CONSEILLÉ DE LA POSSIBILITÉ DE DE TELS DÉGÂTS.
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Les points de vue et les conclusions contenus dans le logiciel et La documentation sont celles des auteurs et ne devraient pas être interprété comme représentant des politiques officielles, soit exprimées, soit implicite, du projet FreeBSD.
+The views and conclusions contained in the software and documentation are those of the authors and should not be interpreted as representing official policies, either expressed or implied, of the FreeBSD Project.
