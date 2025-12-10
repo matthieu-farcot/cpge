@@ -1,13 +1,13 @@
-        DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
-                    Version 2, December 2004 
 
- Copyright (C) 2004 Sam Hocevar <sam@hocevar.net> 
 
- Everyone is permitted to copy and distribute verbatim or modified 
- copies of this license document, and changing it is allowed as long 
- as the name is changed. 
+Copyright 1992-2025 Le Projet FreeBSD.
 
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION 
+Redistribution et utilisation dans les formes source et binaire, avec ou sans modification, sont autorisés à condition que les éléments suivants les conditions sont remplies:
 
-  0. You just DO WHAT THE FUCK YOU WANT TO.
+    Les redistributions de code source doivent conserver le droit d'auteur ci-dessus remarquez, cette liste de conditions et la clause de non-responsabilité suivante.
+
+    Les redistributions sous forme binaire doivent reproduire ce qui précède avis de droit d'auteur, cette liste de conditions et les suivantes clause de non-responsabilité dans la documentation et/ou d'autres documents fournis avec la distribution.
+
+CE LOGICIEL EST FOURNI PAR L'AUTEUR ET LES CONTRIBUTEURS "TELS QUELS" ET TOUTE GARANTIE EXPRESSE OU IMPLICITE, Y COMPRIS, MAIS PAS LIMITÉE À, LES GARANTIES IMPLICITES DE MARCHANDISABILITÉ ET DE FORME PHYSIQUE POUR UN LES FINS PARTICULIÈRES SONT AVIS DÉCLAQUÉS. EN AUCUN CAS L'AUTEUR OU LES CONTRIBUTEURS SONT RESPONSABLES DE TOUT DIRECT, INDIRECT, ACCESSOIRE, DOMMAGES SPÉCIAUX, EXEMPLAIRES OU CONSÉCUTIFS (Y COMPRIS, MAIS PAS LIMITÉ À, L'ACHAT DE BIENS OU DE SERVICES DE SUBSTITUT; PERTE DE UTILISATION, DONNÉES OU PROFITS; OU INTERRUPTION D'ENTREPRISE) CEPENDANT CAUSÉS ET SUR TOUTE THÉORIE DE LA RESPONSABILITÉ, QUE CE SOIT DANS LE CONTRAT, LA RESPONSABILITÉ STRICTE, OU DÉCLENCHER (Y COMPRIS LA NÉGLIGENCE OU AUTREMENT) DÉCOULANT DE TOUTES LES MANIÈRES DE L'UTILISATION DE CE LOGICIEL, MÊME S'IL EST CONSEILLÉ DE LA POSSIBILITÉ DE DE TELS DÉGÂTS.
+
+Les points de vue et les conclusions contenus dans le logiciel et La documentation sont celles des auteurs et ne devraient pas être interprété comme représentant des politiques officielles, soit exprimées, soit implicite, du projet FreeBSD.
