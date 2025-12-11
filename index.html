@@ -1,8 +1,10 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+    <!-- AFRAME + MINDAR -->
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 
     <script>
       /* -----------------------------------------------------------
@@ -62,9 +64,7 @@
             el.sceneEl.appendChild(particle);
 
             setTimeout(() => {
-              if (particle.parentNode) {
-                particle.parentNode.removeChild(particle);
-              }
+              if (particle.parentNode) particle.parentNode.removeChild(particle);
             }, 1200);
           }
         }
@@ -165,64 +165,42 @@
 
   <body>
     <a-scene
-      mindar-image="imageTargetSrc: ./assets/cpge-targets.mind;"
+      mindar-image="imageTargetSrc: assets/cpge-targets.mind;"
+      embedded
+      color-management="true"
+      renderer="colorManagement: true, physicallyCorrectLights"
       vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false"
     >
       <a-assets>
-        <video
-          id="video1"
-          src="assets/films/Temoin1extra.mp4"
-          loop
-          muted
-          playsinline
-          preload="auto"
-        ></video>
-        <video
-          id="video2"
-          src="assets/films/Temoin2extra.mp4"
-          loop
-          muted
-          playsinline
-          preload="auto"
-        ></video>
-        <video
-          id="video3"
-          src="assets/films/Temoin3extra.mp4"
-          loop
-          muted
-          playsinline
-          preload="auto"
-        ></video>
+        <video id="video1" src="assets/films/Temoin1extra.mp4" loop muted playsinline preload="auto"></video>
+        <video id="video2" src="assets/films/Temoin2extra.mp4" loop muted playsinline preload="auto"></video>
+        <video id="video3" src="assets/films/Temoin3extra.mp4" loop muted playsinline preload="auto"></video>
       </a-assets>
 
-      <!-- Caméra -->
-      <a-entity camera look-controls="enabled: false" position="0 1.6 0">
-        <a-entity
-          id="cursor"
+      <!-- !!! CAMÉRA MINDAR OBLIGATOIRE !!! -->
+      <a-camera mindar-camera look-controls="enabled:false">
+        <a-entity id="cursor"
           cursor="fuse:true; fuseTimeout:800"
           raycaster="objects: .playable"
           position="0 0 -1"
           geometry="primitive:ring; radiusInner:0.02; radiusOuter:0.03"
-          material="color:#ff2222; shader:flat"
-        ></a-entity>
-      </a-entity>
+          material="color:#ff2222; shader:flat">
+        </a-entity>
+      </a-camera>
 
-      <!-- Cible MindAR -->
+      <!-- Cible AR -->
       <a-entity mindar-image-target="targetIndex: 0">
-        <!-- Vidéo 1 -->
+
         <a-video
           class="playable"
           src="#video1"
           width="0.9"
           height="1.6"
-          position="0 1.58152 -2.98237"
-          rotation="0 -0.21314 0"
-          scale="1 1 1"
-          sequential-appear="index:0; delay:800; duration:600"
-        ></a-video>
+          position="0 1.5815 -2.9823"
+          rotation="0 -0.21 0"
+          sequential-appear="index:0; delay:800; duration:600">
+        </a-video>
 
-        <!-- Vidéo 2 -->
         <a-video
           class="playable"
           src="#video2"
@@ -230,11 +208,9 @@
           height="1.6"
           position="0.27256 1.566 -3.36963"
           rotation="0 -56.47 0"
-          scale="1 1 1"
-          sequential-appear="index:1; delay:800; duration:600"
-        ></a-video>
+          sequential-appear="index:1; delay:800; duration:600">
+        </a-video>
 
-        <!-- Vidéo 3 -->
         <a-video
           class="playable"
           src="#video3"
@@ -242,13 +218,13 @@
           height="1.6"
           position="-0.26551 1.6 -3.40438"
           rotation="0 58.13 0"
-          scale="1 1 1"
-          sequential-appear="index:2; delay:800; duration:600"
-        ></a-video>
+          sequential-appear="index:2; delay:800; duration:600">
+        </a-video>
+
       </a-entity>
 
-      <!-- Lumière -->
       <a-light type="ambient" intensity="0.5"></a-light>
     </a-scene>
   </body>
 </html>
+
