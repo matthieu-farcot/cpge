@@ -3,76 +3,83 @@
 <head>
   <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
 
-  <!-- Apparaître progressivement après 2 sec -->
+  <!-- Apparition progressive, une vidéo après l’autre -->
   <script>
-    AFRAME.registerComponent('appear-from-flat', {
+    AFRAME.registerComponent('sequential-appear', {
       schema: {
-        delay: {default: 2000},      // Attente avant l’apparition
-        duration: {default: 1200}    // Durée de la sortie 3D
+        index: {type: 'int', default: 0}, 
+        delay: {type: 'int', default: 2000}, 
+        duration: {type: 'int', default: 1000}
       },
 
       init: function () {
         const el = this.el;
+        const data = this.data;
 
-        // On stocke la position et l’échelle finales
         const finalPos = el.object3D.position.clone();
         const finalScale = el.object3D.scale.clone();
 
-        // On place l’objet "à plat"
+        // Mise à plat invisible au démarrage
         el.object3D.scale.set(finalScale.x, finalScale.y, 0.001);
-        el.setAttribute("material", "opacity: 0; transparent: true;");
+        el.setAttribute("material", "opacity:0; transparent:true;");
+        el.object3D.position.z = finalPos.z + 0.4;
 
-        // On avance la vidéo vers la caméra (comme écrasée contre l'affiche)
-        el.object3D.position.z = finalPos.z + 0.5;
+        // Apparition séquentielle
+        const startTime = data.delay + data.index * (data.duration + 300);
 
-        // Lancement après délai
         setTimeout(() => {
+
+          // Son
+          const video = document.querySelector(el.getAttribute("src"));
+          if (video) {
+            video.muted = false;
+            video.play().catch(()=>{});
+          }
+
           // Fade-in
           el.setAttribute("animation__fade", {
             property: "material.opacity",
             from: 0,
             to: 1,
-            dur: this.data.duration,
+            dur: data.duration,
             easing: "easeOutQuad"
           });
 
-          // Dépliage 3D
+          // Sortie du plan 2D vers volume 3D
           el.setAttribute("animation__scale", {
             property: "scale",
             from: `${finalScale.x} ${finalScale.y} 0.001`,
             to: `${finalScale.x} ${finalScale.y} ${finalScale.z}`,
-            dur: this.data.duration,
+            dur: data.duration,
             easing: "easeOutQuad"
           });
 
-          // Recul vers sa vraie position
+          // Recul vers la position finale
           el.setAttribute("animation__move", {
             property: "position",
-            from: `${finalPos.x} ${finalPos.y} ${finalPos.z + 0.5}`,
+            from: `${finalPos.x} ${finalPos.y} ${finalPos.z + 0.4}`,
             to: `${finalPos.x} ${finalPos.y} ${finalPos.z}`,
-            dur: this.data.duration,
+            dur: data.duration,
             easing: "easeOutQuad"
           });
 
-        }, this.data.delay);
+        }, startTime);
       }
     });
   </script>
-
 </head>
 
 <body>
 
   <a-scene>
 
-    <!-- ASSETS VIDÉOS -->
     <a-assets>
-      <video id="video1" src="assets/films/Temoin1extra.mp4" playsinline autoplay muted></video>
-      <video id="video2" src="assets/films/Temoin2extra.mp4" playsinline autoplay muted></video>
-      <video id="video3" src="assets/films/Temoin3extra.mp4" playsinline autoplay muted></video>
+      <!-- Vidéos en proportions d’origine : largeur/hauteur cohérentes -->
+      <video id="video1" src="assets/films/Temoin1extra.mp4" autoplay muted playsinline preload="auto"></video>
+      <video id="video2" src="assets/films/Temoin2extra.mp4" autoplay muted playsinline preload="auto"></video>
+      <video id="video3" src="assets/films/Temoin3extra.mp4" autoplay muted playsinline preload="auto"></video>
     </a-assets>
 
-    <!-- CAMÉRA + CURSEUR -->
     <a-entity camera look-controls position="0 1.6 0">
       <a-entity id="cursor"
         cursor="fuse:true; fuseTimeout:800"
@@ -83,33 +90,37 @@
       </a-entity>
     </a-entity>
 
-    <!-- VIDÉO 1 -->
-    <a-video class="playable"
-             src="#video1"
-             width="16" height="9"
-             position="0 1.5 -3"
-             scale="0.2 0.2 0.2"
-             appear-from-flat>
+    <!-- Vidéo 1 : centrée -->
+    <a-video
+      class="playable"
+      src="#video1"
+      width="1.6" height="0.9"        
+      position="0 1.55 -3"
+      rotation="0 0 0"
+      scale="1 1 1"
+      sequential-appear="index:0; delay:1500; duration:1200">
     </a-video>
 
-    <!-- VIDÉO 2 -->
-    <a-video class="playable"
-             src="#video2"
-             width="16" height="9"
-             position="1 1.45 -3.1"
-             rotation="0 -20 0"
-             scale="0.2 0.2 0.2"
-             appear-from-flat>
+    <!-- Vidéo 2 : un peu à droite pour ne pas entrer dans la 1 -->
+    <a-video
+      class="playable"
+      src="#video2"
+      width="1.6" height="0.9"
+      position="1.2 1.5 -3"
+      rotation="0 -15 0"
+      scale="1 1 1"
+      sequential-appear="index:1; delay:1500; duration:1200">
     </a-video>
 
-    <!-- VIDÉO 3 -->
-    <a-video class="playable"
-             src="#video3"
-             width="16" height="9"
-             position="-1 1.45 -3.1"
-             rotation="0 20 0"
-             scale="0.2 0.2 0.2"
-             appear-from-flat>
+    <!-- Vidéo 3 : un peu à gauche pour ne pas entrer dans la 1 -->
+    <a-video
+      class="playable"
+      src="#video3"
+      width="1.6" height="0.9"
+      position="-1.2 1.5 -3"
+      rotation="0 15 0"
+      scale="1 1 1"
+      sequential-appear="index:2; delay:1500; duration:1200">
     </a-video>
 
   </a-scene>
