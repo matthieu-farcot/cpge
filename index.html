@@ -139,7 +139,7 @@
   </script>
 </head>
 <body>
-  <a-scene>
+  <a-scene mindar-image="imageTargetSrc: ./assets/cpge-targets.mind;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
     <a-assets>
       <!-- Vidéos verticales (format portrait 9:16) -->
       <video id="video1" src="assets/films/Temoin1extra.mp4" loop muted playsinline preload="auto"></video>
@@ -148,7 +148,7 @@
     </a-assets>
 
     <!-- Caméra avec curseur -->
-    <a-entity camera look-controls position="0 1.6 0">
+    <a-entity camera look-controls="enabled: false" position="0 1.6 0">
       <a-entity id="cursor"
         cursor="fuse:true; fuseTimeout:800"
         raycaster="objects: .playable"
@@ -157,7 +157,7 @@
         material="color:#ff2222; shader:flat">
       </a-entity>
     </a-entity>
-
+      <a-entity mindar-image-target="targetIndex: 0">
     <!-- Vidéo 1 : position ajustée selon l'export -->
     <a-video
       class="playable"
@@ -190,7 +190,7 @@
       scale="1 1 1"
       sequential-appear="index:2; delay:800; duration:600">
     </a-video>
-
+</a-entity>
     <!-- Lumière ambiante -->
     <a-light type="ambient" intensity="0.5"></a-light>
   </a-scene>
