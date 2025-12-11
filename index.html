@@ -3,90 +3,79 @@
 <head>
   <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
 
-  <!-- Lecture/pause vidéo au regard -->
+  <!-- Apparaître progressivement après 2 sec -->
   <script>
-    AFRAME.registerComponent('play-on-look', {
-      schema: {videoId: {default: ''}},
-      init: function () {
-        const video = document.querySelector(this.data.videoId);
-        this.el.addEventListener('mouseenter', () => video && video.play());
-        this.el.addEventListener('mouseleave', () => video && video.pause());
-      }
-    });
-  </script>
-
-  <!-- Effet : la vidéo sort de son écran dans son axe LOCAL -->
-  <script>
-    AFRAME.registerComponent('pop-local', {
+    AFRAME.registerComponent('appear-from-flat', {
       schema: {
-        distance: {default: 0.25},
-        duration: {default: 250}
+        delay: {default: 2000},      // Attente avant l’apparition
+        duration: {default: 1200}    // Durée de la sortie 3D
       },
 
       init: function () {
         const el = this.el;
-        const data = this.data;
 
-        // Position de base dans le monde
-        const basePos = new THREE.Vector3();
-        el.object3D.getWorldPosition(basePos);
+        // On stocke la position et l’échelle finales
+        const finalPos = el.object3D.position.clone();
+        const finalScale = el.object3D.scale.clone();
 
-        // Calcul de la direction locale (vers l'avant du panneau vidéo)
-        const forward = new THREE.Vector3(0, 0, -1);
-        el.object3D.localToWorld(forward);
-        forward.sub(basePos).normalize();
+        // On place l’objet "à plat"
+        el.object3D.scale.set(finalScale.x, finalScale.y, 0.001);
+        el.setAttribute("material", "opacity: 0; transparent: true;");
 
-        // Position cible : un peu vers l’avant dans son axe
-        const targetPos = basePos.clone().add(forward.multiplyScalar(data.distance));
+        // On avance la vidéo vers la caméra (comme écrasée contre l'affiche)
+        el.object3D.position.z = finalPos.z + 0.5;
 
-        // Animation quand on vise
-        el.addEventListener('mouseenter', () => {
-          el.setAttribute("animation__pop", {
-            property: "position",
-            to: `${targetPos.x} ${targetPos.y} ${targetPos.z}`,
-            dur: data.duration,
+        // Lancement après délai
+        setTimeout(() => {
+          // Fade-in
+          el.setAttribute("animation__fade", {
+            property: "material.opacity",
+            from: 0,
+            to: 1,
+            dur: this.data.duration,
             easing: "easeOutQuad"
           });
-        });
 
-        // Retour quand on arrête de viser
-        el.addEventListener('mouseleave', () => {
-          el.setAttribute("animation__pop", {
-            property: "position",
-            to: `${basePos.x} ${basePos.y} ${basePos.z}`,
-            dur: data.duration,
+          // Dépliage 3D
+          el.setAttribute("animation__scale", {
+            property: "scale",
+            from: `${finalScale.x} ${finalScale.y} 0.001`,
+            to: `${finalScale.x} ${finalScale.y} ${finalScale.z}`,
+            dur: this.data.duration,
             easing: "easeOutQuad"
           });
-        });
+
+          // Recul vers sa vraie position
+          el.setAttribute("animation__move", {
+            property: "position",
+            from: `${finalPos.x} ${finalPos.y} ${finalPos.z + 0.5}`,
+            to: `${finalPos.x} ${finalPos.y} ${finalPos.z}`,
+            dur: this.data.duration,
+            easing: "easeOutQuad"
+          });
+
+        }, this.data.delay);
       }
     });
   </script>
+
 </head>
 
 <body>
 
-  <!-- Activation audio -->
-  <div id="startAudio" style="
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background:black; color:white; display:flex;
-    justify-content:center; align-items:center;
-    font-size:28px; cursor:pointer; z-index:999;">
-    Cliquer pour commencer
-  </div>
-
   <a-scene>
 
-    <!-- Vidéos -->
+    <!-- ASSETS VIDÉOS -->
     <a-assets>
-      <video id="video1" src="assets/films/Temoin1extra.mp4" muted playsinline crossorigin="anonymous"></video>
-      <video id="video2" src="assets/films/Temoin2extra.mp4" muted playsinline crossorigin="anonymous"></video>
-      <video id="video3" src="assets/films/Temoin3extra.mp4" muted playsinline crossorigin="anonymous"></video>
+      <video id="video1" src="assets/films/Temoin1extra.mp4" playsinline autoplay muted></video>
+      <video id="video2" src="assets/films/Temoin2extra.mp4" playsinline autoplay muted></video>
+      <video id="video3" src="assets/films/Temoin3extra.mp4" playsinline autoplay muted></video>
     </a-assets>
 
-    <!-- Caméra -->
+    <!-- CAMÉRA + CURSEUR -->
     <a-entity camera look-controls position="0 1.6 0">
       <a-entity id="cursor"
-        cursor="fuse:true; fuseTimeout:700"
+        cursor="fuse:true; fuseTimeout:800"
         raycaster="objects: .playable"
         position="0 0 -1"
         geometry="primitive:ring; radiusInner:0.02; radiusOuter:0.03"
@@ -94,49 +83,36 @@
       </a-entity>
     </a-entity>
 
-    <!-- VIDEOS QUI SORTENT DE LEUR ÉCRAN -->
+    <!-- VIDÉO 1 -->
     <a-video class="playable"
              src="#video1"
-             play-on-look="videoId:#video1"
-             pop-local
              width="16" height="9"
              position="0 1.5 -3"
-             scale="0.2 0.2 0.2">
+             scale="0.2 0.2 0.2"
+             appear-from-flat>
     </a-video>
 
+    <!-- VIDÉO 2 -->
     <a-video class="playable"
              src="#video2"
-             play-on-look="videoId:#video2"
-             pop-local
              width="16" height="9"
              position="1 1.45 -3.1"
              rotation="0 -20 0"
-             scale="0.2 0.2 0.2">
+             scale="0.2 0.2 0.2"
+             appear-from-flat>
     </a-video>
 
+    <!-- VIDÉO 3 -->
     <a-video class="playable"
              src="#video3"
-             play-on-look="videoId:#video3"
-             pop-local
              width="16" height="9"
              position="-1 1.45 -3.1"
              rotation="0 20 0"
-             scale="0.2 0.2 0.2">
+             scale="0.2 0.2 0.2"
+             appear-from-flat>
     </a-video>
 
   </a-scene>
-
-  <!-- Démarrage audio -->
-  <script>
-    document.querySelector('#startAudio').addEventListener('click', () => {
-      ['#video1','#video2','#video3'].forEach(id => {
-        const v = document.querySelector(id);
-        v.muted = false;
-        v.play().catch(()=>{});
-      });
-      document.querySelector('#startAudio').style.display = 'none';
-    });
-  </script>
 
 </body>
 </html>
