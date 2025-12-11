@@ -6,7 +6,7 @@
     // Système de particules
     AFRAME.registerComponent('particle-burst', {
       schema: {
-        color: {type: 'color', default: '#00ffff'}
+        color: {type: 'color', default: '#888888'}
       },
       init: function() {
         const el = this.el;
@@ -83,8 +83,8 @@
         const animDuration = durations[data.index];
         
         setTimeout(() => {
-          // Particules d'apparition
-          const particleColors = ['#00ffff', '#ff00ff', '#ffff00'];
+          // Particules grises pour toutes les vidéos
+          const particleColors = ['#999999', '#777777', '#888888'];
           el.setAttribute('particle-burst', {color: particleColors[data.index]});
           
           // Activer le son et lancer la vidéo
@@ -157,15 +157,15 @@
       </a-entity>
     </a-entity>
 
-    <!-- Vidéo 1 : centrée, format vertical (0.9 largeur × 1.6 hauteur) -->
+    <!-- Vidéo 1 : position ajustée selon l'export -->
     <a-video
-       class="playable"
-       src="#video1"
-       width="0.9" height="1.6"        
-       position; to: -0.018 1.597 -3.025"
-       rotation="0 -6.860023681101347 0"   
-       scale="1 1 1"
-       sequential-appear="index:0; delay:800; duration:600">
+      class="playable"
+      src="#video1"
+      width="0.9" height="1.6"        
+      position="0 1.76099 -2.98237"
+      rotation="-0.5007651129443395 -0.21314029978866625 2.411579359705635"
+      scale="1 1 1"
+      sequential-appear="index:0; delay:800; duration:600">
     </a-video>
 
     <!-- Vidéo 2 : à droite, légèrement tournée vers le centre -->
