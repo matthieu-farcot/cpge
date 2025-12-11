@@ -1,148 +1,142 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+<head>
+  <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
 
-    <!-- Lecture/pause au regard -->
-    <script>
-      AFRAME.registerComponent('play-on-look', {
-        schema: {videoId: {default: ''}},
-        init: function () {
-          const video = document.querySelector(this.data.videoId);
-          this.el.addEventListener('mouseenter', () => video && video.play());
-          this.el.addEventListener('mouseleave', () => video && video.pause());
-        }
-      });
-    </script>
+  <!-- Lecture/pause vidéo au regard -->
+  <script>
+    AFRAME.registerComponent('play-on-look', {
+      schema: {videoId: {default: ''}},
+      init: function () {
+        const video = document.querySelector(this.data.videoId);
+        this.el.addEventListener('mouseenter', () => video && video.play());
+        this.el.addEventListener('mouseleave', () => video && video.pause());
+      }
+    });
+  </script>
 
-    <!-- Effet "sort de l'écran" -->
-    <script>
-      AFRAME.registerComponent('pop-video', {
-        schema: {
-          zoom: {default: 2},        // Agrandissement fort
-          forward: {default: 0.6},   // Avance vers la caméra
-          duration: {default: 250}   // Vitesse d'animation
-        },
+  <!-- Effet : la vidéo sort de son écran dans son axe LOCAL -->
+  <script>
+    AFRAME.registerComponent('pop-local', {
+      schema: {
+        distance: {default: 0.25},
+        duration: {default: 250}
+      },
 
-        init: function () {
-          const el = this.el;
-          const basePos = el.object3D.position.clone();
-          const baseScale = el.object3D.scale.clone();
-          const d = this.data;
+      init: function () {
+        const el = this.el;
+        const data = this.data;
 
-          el.addEventListener('mouseenter', () => {
-            // Avancer vers la caméra
-            el.setAttribute("animation__move", {
-              property: "position",
-              to: `${basePos.x} ${basePos.y} ${basePos.z - d.forward}`,
-              dur: d.duration,
-              easing: "easeOutQuad"
-            });
+        // Position de base dans le monde
+        const basePos = new THREE.Vector3();
+        el.object3D.getWorldPosition(basePos);
 
-            // Grossir fort
-            el.setAttribute("animation__scale", {
-              property: "scale",
-              to: `${baseScale.x * d.zoom} ${baseScale.y * d.zoom} ${baseScale.z * d.zoom}`,
-              dur: d.duration,
-              easing: "easeOutQuad"
-            });
+        // Calcul de la direction locale (vers l'avant du panneau vidéo)
+        const forward = new THREE.Vector3(0, 0, -1);
+        el.object3D.localToWorld(forward);
+        forward.sub(basePos).normalize();
+
+        // Position cible : un peu vers l’avant dans son axe
+        const targetPos = basePos.clone().add(forward.multiplyScalar(data.distance));
+
+        // Animation quand on vise
+        el.addEventListener('mouseenter', () => {
+          el.setAttribute("animation__pop", {
+            property: "position",
+            to: `${targetPos.x} ${targetPos.y} ${targetPos.z}`,
+            dur: data.duration,
+            easing: "easeOutQuad"
           });
-
-          el.addEventListener('mouseleave', () => {
-            // Retour position
-            el.setAttribute("animation__move", {
-              property: "position",
-              to: `${basePos.x} ${basePos.y} ${basePos.z}`,
-              dur: d.duration,
-              easing: "easeOutQuad"
-            });
-
-            // Retour échelle
-            el.setAttribute("animation__scale", {
-              property: "scale",
-              to: `${baseScale.x} ${baseScale.y} ${baseScale.z}`,
-              dur: d.duration,
-              easing: "easeOutQuad"
-            });
-          });
-        }
-      });
-    </script>
-
-  </head>
-
-  <body>
-
-    <!-- Bouton d’activation audio -->
-    <div id="startAudio"
-         style="position: fixed; top:0; left:0; width:100%; height:100%;
-                background:black; color:white; display:flex;
-                justify-content:center; align-items:center; font-size:28px;
-                cursor:pointer; z-index: 999;">
-      Cliquer pour commencer
-    </div>
-
-    <a-scene>
-
-      <a-assets>
-        <video id="video1" src="assets/films/Temoin1extra.mp4" playsinline crossorigin="anonymous" muted></video>
-        <video id="video2" src="assets/films/Temoin2extra.mp4" playsinline crossorigin="anonymous" muted></video>
-        <video id="video3" src="assets/films/Temoin3extra.mp4" playsinline crossorigin="anonymous" muted></video>
-      </a-assets>
-
-      <!-- CAMERA -->
-      <a-entity camera look-controls position="0 1.6 0">
-        <a-entity id="cursor"
-                  cursor="fuse:true; fuseTimeout:700"
-                  raycaster="objects: .playable"
-                  position="0 0 -1"
-                  geometry="primitive:ring; radiusInner:0.02; radiusOuter:0.03"
-                  material="color:#ff2222; shader:flat">
-        </a-entity>
-      </a-entity>
-
-      <!-- VIDEOS AVEC EFFET "SORT DE L'ÉCRAN" -->
-      <a-video class="playable"
-               src="#video1"
-               play-on-look="videoId: #video1"
-               pop-video
-               width="16" height="9"
-               position="0 1.5 -3"
-               scale="0.2 0.2 0.2">
-      </a-video>
-
-      <a-video class="playable"
-               src="#video2"
-               play-on-look="videoId: #video2"
-               pop-video
-               width="16" height="9"
-               position="1 1.4 -3.2"
-               rotation="0 -20 0"
-               scale="0.2 0.2 0.2">
-      </a-video>
-
-      <a-video class="playable"
-               src="#video3"
-               play-on-look="videoId: #video3"
-               pop-video
-               width="16" height="9"
-               position="-1 1.4 -3.2"
-               rotation="0 20 0"
-               scale="0.2 0.2 0.2">
-      </a-video>
-
-    </a-scene>
-
-    <script>
-      document.querySelector('#startAudio').addEventListener('click', () => {
-        ['#video1', '#video2', '#video3'].forEach(id => {
-          const v = document.querySelector(id);
-          v.muted = false;
-          v.play().catch(()=>{});
         });
-        document.querySelector('#startAudio').style.display = 'none';
-      });
-    </script>
 
-  </body>
+        // Retour quand on arrête de viser
+        el.addEventListener('mouseleave', () => {
+          el.setAttribute("animation__pop", {
+            property: "position",
+            to: `${basePos.x} ${basePos.y} ${basePos.z}`,
+            dur: data.duration,
+            easing: "easeOutQuad"
+          });
+        });
+      }
+    });
+  </script>
+</head>
+
+<body>
+
+  <!-- Activation audio -->
+  <div id="startAudio" style="
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background:black; color:white; display:flex;
+    justify-content:center; align-items:center;
+    font-size:28px; cursor:pointer; z-index:999;">
+    Cliquer pour commencer
+  </div>
+
+  <a-scene>
+
+    <!-- Vidéos -->
+    <a-assets>
+      <video id="video1" src="assets/films/Temoin1extra.mp4" muted playsinline crossorigin="anonymous"></video>
+      <video id="video2" src="assets/films/Temoin2extra.mp4" muted playsinline crossorigin="anonymous"></video>
+      <video id="video3" src="assets/films/Temoin3extra.mp4" muted playsinline crossorigin="anonymous"></video>
+    </a-assets>
+
+    <!-- Caméra -->
+    <a-entity camera look-controls position="0 1.6 0">
+      <a-entity id="cursor"
+        cursor="fuse:true; fuseTimeout:700"
+        raycaster="objects: .playable"
+        position="0 0 -1"
+        geometry="primitive:ring; radiusInner:0.02; radiusOuter:0.03"
+        material="color:#ff2222; shader:flat">
+      </a-entity>
+    </a-entity>
+
+    <!-- VIDEOS QUI SORTENT DE LEUR ÉCRAN -->
+    <a-video class="playable"
+             src="#video1"
+             play-on-look="videoId:#video1"
+             pop-local
+             width="16" height="9"
+             position="0 1.5 -3"
+             scale="0.2 0.2 0.2">
+    </a-video>
+
+    <a-video class="playable"
+             src="#video2"
+             play-on-look="videoId:#video2"
+             pop-local
+             width="16" height="9"
+             position="1 1.45 -3.1"
+             rotation="0 -20 0"
+             scale="0.2 0.2 0.2">
+    </a-video>
+
+    <a-video class="playable"
+             src="#video3"
+             play-on-look="videoId:#video3"
+             pop-local
+             width="16" height="9"
+             position="-1 1.45 -3.1"
+             rotation="0 20 0"
+             scale="0.2 0.2 0.2">
+    </a-video>
+
+  </a-scene>
+
+  <!-- Démarrage audio -->
+  <script>
+    document.querySelector('#startAudio').addEventListener('click', () => {
+      ['#video1','#video2','#video3'].forEach(id => {
+        const v = document.querySelector(id);
+        v.muted = false;
+        v.play().catch(()=>{});
+      });
+      document.querySelector('#startAudio').style.display = 'none';
+    });
+  </script>
+
+</body>
 </html>
