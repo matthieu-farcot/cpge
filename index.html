@@ -3,11 +3,61 @@
 <head>
   <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
   <script>
+    // Système de particules
+    AFRAME.registerComponent('particle-burst', {
+      schema: {
+        color: {type: 'color', default: '#00ffff'}
+      },
+      init: function() {
+        const el = this.el;
+        const data = this.data;
+        const particleCount = 25;
+        
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('a-sphere');
+          const angle = (Math.PI * 2 * i) / particleCount;
+          const speed = 0.3 + Math.random() * 0.5;
+          const radius = 0.02 + Math.random() * 0.03;
+          
+          particle.setAttribute('radius', radius);
+          particle.setAttribute('color', data.color);
+          particle.setAttribute('material', 'shader: flat');
+          particle.setAttribute('position', el.object3D.position);
+          
+          const targetX = el.object3D.position.x + Math.cos(angle) * speed;
+          const targetY = el.object3D.position.y + Math.random() * 0.8;
+          const targetZ = el.object3D.position.z + Math.sin(angle) * speed;
+          
+          particle.setAttribute('animation__move', {
+            property: 'position',
+            to: `${targetX} ${targetY} ${targetZ}`,
+            dur: 600 + Math.random() * 400,
+            easing: 'easeOutQuad'
+          });
+          
+          particle.setAttribute('animation__fade', {
+            property: 'material.opacity',
+            from: 1,
+            to: 0,
+            dur: 800,
+            easing: 'easeInQuad'
+          });
+          
+          particle.setAttribute('material', 'transparent', true);
+          el.sceneEl.appendChild(particle);
+          
+          setTimeout(() => {
+            el.sceneEl.removeChild(particle);
+          }, 1200);
+        }
+      }
+    });
+
     AFRAME.registerComponent('sequential-appear', {
       schema: {
         index: {type: 'int', default: 0}, 
-        delay: {type: 'int', default: 2000}, 
-        duration: {type: 'int', default: 1000}
+        delay: {type: 'int', default: 1000}, 
+        duration: {type: 'int', default: 600}
       },
       init: function () {
         const el = this.el;
@@ -26,10 +76,17 @@
         el.object3D.position.y = startPosY;
         el.setAttribute("material", "opacity:0; transparent:true;");
         
-        // Apparition séquentielle
-        const startTime = data.delay + data.index * (data.duration + 500);
+        // Apparition séquentielle avec timing variable
+        const delays = [0, 350, 650]; // Timing irrégulier
+        const durations = [500, 650, 550]; // Durées variables
+        const startTime = data.delay + delays[data.index];
+        const animDuration = durations[data.index];
         
         setTimeout(() => {
+          // Particules d'apparition
+          const particleColors = ['#00ffff', '#ff00ff', '#ffff00'];
+          el.setAttribute('particle-burst', {color: particleColors[data.index]});
+          
           // Activer le son et lancer la vidéo
           const videoId = el.getAttribute("src");
           const video = document.querySelector(videoId);
@@ -39,22 +96,22 @@
             video.play().catch(err => console.log("Lecture vidéo:", err));
           }
           
-          // Fade-in opacité
+          // Fade-in opacité rapide
           el.setAttribute("animation__fade", {
             property: "material.opacity",
             from: 0,
             to: 1,
-            dur: data.duration,
-            easing: "easeOutBack"
+            dur: animDuration * 0.7,
+            easing: "easeOutQuad"
           });
           
-          // Expansion verticale (scale.y de 0.001 vers valeur finale)
+          // Expansion verticale avec rebond
           el.setAttribute("animation__scale", {
             property: "scale",
             from: `${finalScale.x} 0.001 ${finalScale.z}`,
             to: `${finalScale.x} ${finalScale.y} ${finalScale.z}`,
-            dur: data.duration,
-            easing: "easeOutBack"
+            dur: animDuration,
+            easing: "easeOutElastic"
           });
           
           // Mouvement vers le haut pour garder la base fixe
@@ -62,7 +119,17 @@
             property: "position",
             from: `${finalPos.x} ${startPosY} ${finalPos.z}`,
             to: `${finalPos.x} ${finalPos.y} ${finalPos.z}`,
-            dur: data.duration,
+            dur: animDuration,
+            easing: "easeOutElastic"
+          });
+          
+          // Rotation légère pour effet dynamique
+          const rotVariation = (Math.random() - 0.5) * 10;
+          el.setAttribute("animation__rotate", {
+            property: "rotation",
+            from: `0 ${el.object3D.rotation.y * 180/Math.PI + rotVariation} 0`,
+            to: `0 ${el.object3D.rotation.y * 180/Math.PI} 0`,
+            dur: animDuration,
             easing: "easeOutBack"
           });
         }, startTime);
@@ -98,7 +165,7 @@
       position="0 1.6 -3"
       rotation="0 0 0"
       scale="1 1 1"
-      sequential-appear="index:0; delay:1000; duration:1200">
+      sequential-appear="index:0; delay:800; duration:600">
     </a-video>
 
     <!-- Vidéo 2 : à droite, légèrement tournée vers le centre -->
@@ -109,7 +176,7 @@
       position="1.3 1.6 -3.2"
       rotation="0 -20 0"
       scale="1 1 1"
-      sequential-appear="index:1; delay:1000; duration:1200">
+      sequential-appear="index:1; delay:800; duration:600">
     </a-video>
 
     <!-- Vidéo 3 : à gauche, légèrement tournée vers le centre -->
@@ -120,7 +187,7 @@
       position="-1.3 1.6 -3.2"
       rotation="0 20 0"
       scale="1 1 1"
-      sequential-appear="index:2; delay:1000; duration:1200">
+      sequential-appear="index:2; delay:800; duration:600">
     </a-video>
 
     <!-- Lumière ambiante -->
