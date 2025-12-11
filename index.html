@@ -3,196 +3,252 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  <script>
-    // Système de particules
-    AFRAME.registerComponent('particle-burst', {
-      schema: {
-        color: {type: 'color', default: '#888888'}
-      },
-      init: function() {
-        const el = this.el;
-        const data = this.data;
-        const particleCount = 25;
-        
-        for (let i = 0; i < particleCount; i++) {
-          const particle = document.createElement('a-sphere');
-          const angle = (Math.PI * 2 * i) / particleCount;
-          const speed = 0.3 + Math.random() * 0.5;
-          const radius = 0.02 + Math.random() * 0.03;
-          
-          particle.setAttribute('radius', radius);
-          particle.setAttribute('color', data.color);
-          particle.setAttribute('material', 'shader: flat');
-          particle.setAttribute('position', el.object3D.position);
-          
-          const targetX = el.object3D.position.x + Math.cos(angle) * speed;
-          const targetY = el.object3D.position.y + Math.random() * 0.8;
-          const targetZ = el.object3D.position.z + Math.sin(angle) * speed;
-          
-          particle.setAttribute('animation__move', {
-            property: 'position',
-            to: `${targetX} ${targetY} ${targetZ}`,
-            dur: 600 + Math.random() * 400,
-            easing: 'easeOutQuad'
-          });
-          
-          particle.setAttribute('animation__fade', {
-            property: 'material.opacity',
-            from: 1,
-            to: 0,
-            dur: 800,
-            easing: 'easeInQuad'
-          });
-          
-          particle.setAttribute('material', 'transparent', true);
-          el.sceneEl.appendChild(particle);
-          
-          setTimeout(() => {
-            el.sceneEl.removeChild(particle);
-          }, 1200);
-        }
-      }
-    });
 
-    AFRAME.registerComponent('sequential-appear', {
-      schema: {
-        index: {type: 'int', default: 0}, 
-        delay: {type: 'int', default: 1000}, 
-        duration: {type: 'int', default: 600}
-      },
-      init: function () {
-        const el = this.el;
-        const data = this.data;
-        const finalPos = el.object3D.position.clone();
-        const finalScale = el.object3D.scale.clone();
-        
-        // Récupérer la hauteur de la vidéo
-        const videoHeight = parseFloat(el.getAttribute("height"));
-        
-        // Position de départ : base fixe (décalée vers le bas de la moitié de la hauteur)
-        const startPosY = finalPos.y - (videoHeight / 2);
-        
-        // Échelle initiale : hauteur à 0.001
-        el.object3D.scale.set(finalScale.x, 0.001, finalScale.z);
-        el.object3D.position.y = startPosY;
-        el.setAttribute("material", "opacity:0; transparent:true;");
-        
-        // Apparition séquentielle avec timing variable
-        const delays = [0, 350, 650]; // Timing irrégulier
-        const durations = [500, 650, 550]; // Durées variables
-        const startTime = data.delay + delays[data.index];
-        const animDuration = durations[data.index];
-        
-        setTimeout(() => {
-          // Particules grises pour toutes les vidéos
-          const particleColors = ['#999999', '#777777', '#888888'];
-          el.setAttribute('particle-burst', {color: particleColors[data.index]});
-          
-          // Activer le son et lancer la vidéo
-          const videoId = el.getAttribute("src");
-          const video = document.querySelector(videoId);
-          if (video) {
-            video.muted = false;
-            video.currentTime = 0;
-            video.play().catch(err => console.log("Lecture vidéo:", err));
+    <script>
+      /* -----------------------------------------------------------
+          PARTICLE BURST (corrigé)
+      ----------------------------------------------------------- */
+      AFRAME.registerComponent('particle-burst', {
+        schema: { color: { type: 'color', default: '#888888' } },
+
+        init: function () {
+          const el = this.el;
+          const data = this.data;
+          const particleCount = 25;
+
+          // Position de départ en world space
+          const startPos = el.object3D.getWorldPosition(new THREE.Vector3());
+
+          for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('a-sphere');
+
+            const angle = (Math.PI * 2 * i) / particleCount;
+            const speed = 0.3 + Math.random() * 0.5;
+            const radius = 0.02 + Math.random() * 0.03;
+
+            particle.setAttribute('radius', radius);
+            particle.setAttribute('color', data.color);
+            particle.setAttribute(
+              'material',
+              'shader: flat; transparent: true; opacity: 1;'
+            );
+
+            // Position initiale
+            particle.setAttribute(
+              'position',
+              `${startPos.x} ${startPos.y} ${startPos.z}`
+            );
+
+            // Destination
+            const targetX = startPos.x + Math.cos(angle) * speed;
+            const targetY = startPos.y + Math.random() * 0.8;
+            const targetZ = startPos.z + Math.sin(angle) * speed;
+
+            particle.setAttribute('animation__move', {
+              property: 'position',
+              to: `${targetX} ${targetY} ${targetZ}`,
+              dur: 600 + Math.random() * 400,
+              easing: 'easeOutQuad'
+            });
+
+            particle.setAttribute('animation__fade', {
+              property: 'material.opacity',
+              from: 1,
+              to: 0,
+              dur: 800,
+              easing: 'easeInQuad'
+            });
+
+            el.sceneEl.appendChild(particle);
+
+            setTimeout(() => {
+              if (particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+              }
+            }, 1200);
           }
-          
-          // Fade-in opacité rapide
-          el.setAttribute("animation__fade", {
-            property: "material.opacity",
-            from: 0,
-            to: 1,
-            dur: animDuration * 0.7,
-            easing: "easeOutQuad"
-          });
-          
-          // Expansion verticale avec rebond
-          el.setAttribute("animation__scale", {
-            property: "scale",
-            from: `${finalScale.x} 0.001 ${finalScale.z}`,
-            to: `${finalScale.x} ${finalScale.y} ${finalScale.z}`,
-            dur: animDuration,
-            easing: "easeOutElastic"
-          });
-          
-          // Mouvement vers le haut pour garder la base fixe
-          el.setAttribute("animation__position", {
-            property: "position",
-            from: `${finalPos.x} ${startPosY} ${finalPos.z}`,
-            to: `${finalPos.x} ${finalPos.y} ${finalPos.z}`,
-            dur: animDuration,
-            easing: "easeOutElastic"
-          });
-          
-          // Rotation légère pour effet dynamique
-          const rotVariation = (Math.random() - 0.5) * 10;
-          el.setAttribute("animation__rotate", {
-            property: "rotation",
-            from: `0 ${el.object3D.rotation.y * 180/Math.PI + rotVariation} 0`,
-            to: `0 ${el.object3D.rotation.y * 180/Math.PI} 0`,
-            dur: animDuration,
-            easing: "easeOutBack"
-          });
-        }, startTime);
-      }
-    });
-  </script>
-</head>
-<body>
-  <a-scene mindar-image="imageTargetSrc: ./assets/cpge-targets.mind;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-    <a-assets>
-      <!-- Vidéos verticales (format portrait 9:16) -->
-      <video id="video1" src="assets/films/Temoin1extra.mp4" loop muted playsinline preload="auto"></video>
-      <video id="video2" src="assets/films/Temoin2extra.mp4" loop muted playsinline preload="auto"></video>
-      <video id="video3" src="assets/films/Temoin3extra.mp4" loop muted playsinline preload="auto"></video>
-    </a-assets>
+        }
+      });
 
-    <!-- Caméra avec curseur -->
-    <a-entity camera look-controls="enabled: false" position="0 1.6 0">
-      <a-entity id="cursor"
-        cursor="fuse:true; fuseTimeout:800"
-        raycaster="objects: .playable"
-        position="0 0 -1"
-        geometry="primitive:ring; radiusInner:0.02; radiusOuter:0.03"
-        material="color:#ff2222; shader:flat">
+      /* -----------------------------------------------------------
+          SEQUENTIAL APPEAR (corrigé)
+      ----------------------------------------------------------- */
+      AFRAME.registerComponent('sequential-appear', {
+        schema: {
+          index: { type: 'int', default: 0 },
+          delay: { type: 'int', default: 1000 },
+          duration: { type: 'int', default: 600 }
+        },
+
+        init: function () {
+          const el = this.el;
+          const data = this.data;
+
+          const finalPos = el.object3D.position.clone();
+          const finalScale = el.object3D.scale.clone();
+
+          const videoHeight = parseFloat(el.getAttribute('height'));
+          const startPosY = finalPos.y - videoHeight / 2;
+
+          // État initial (invisible et écrasé)
+          el.object3D.scale.set(finalScale.x, 0.001, finalScale.z);
+          el.object3D.position.y = startPosY;
+          el.setAttribute('material', 'opacity:0; transparent:true;');
+
+          const delays = [0, 350, 650];
+          const durations = [500, 650, 550];
+
+          const startTime = data.delay + delays[data.index];
+          const animDuration = durations[data.index];
+
+          setTimeout(() => {
+            // Burst de particules grisées
+            const particleColors = ['#999999', '#777777', '#888888'];
+            el.setAttribute('particle-burst', {
+              color: particleColors[data.index]
+            });
+
+            // Lecture vidéo
+            const videoId = el.getAttribute('src');
+            const video = document.querySelector(videoId);
+            if (video) {
+              video.muted = false;
+              video.currentTime = 0;
+              video.play().catch(err =>
+                console.log('Lecture vidéo:', err)
+              );
+            }
+
+            // Fade-in
+            el.setAttribute('animation__fade', {
+              property: 'material.opacity',
+              from: 0,
+              to: 1,
+              dur: animDuration * 0.7,
+              easing: 'easeOutQuad'
+            });
+
+            // Expansion verticale
+            el.setAttribute('animation__scale', {
+              property: 'scale',
+              from: `${finalScale.x} 0.001 ${finalScale.z}`,
+              to: `${finalScale.x} ${finalScale.y} ${finalScale.z}`,
+              dur: animDuration,
+              easing: 'easeOutElastic'
+            });
+
+            // Remontée depuis la base
+            el.setAttribute('animation__position', {
+              property: 'position',
+              from: `${finalPos.x} ${startPosY} ${finalPos.z}`,
+              to: `${finalPos.x} ${finalPos.y} ${finalPos.z}`,
+              dur: animDuration,
+              easing: 'easeOutElastic'
+            });
+
+            // Légère rotation aléatoire
+            const rotVariation = (Math.random() - 0.5) * 10;
+            el.setAttribute('animation__rotate', {
+              property: 'rotation',
+              from: `0 ${
+                el.object3D.rotation.y * (180 / Math.PI) + rotVariation
+              } 0`,
+              to: `0 ${el.object3D.rotation.y * (180 / Math.PI)} 0`,
+              dur: animDuration,
+              easing: 'easeOutBack'
+            });
+          }, startTime);
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <a-scene
+      mindar-image="imageTargetSrc: ./assets/cpge-targets.mind;"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-assets>
+        <video
+          id="video1"
+          src="assets/films/Temoin1extra.mp4"
+          loop
+          muted
+          playsinline
+          preload="auto"
+        ></video>
+        <video
+          id="video2"
+          src="assets/films/Temoin2extra.mp4"
+          loop
+          muted
+          playsinline
+          preload="auto"
+        ></video>
+        <video
+          id="video3"
+          src="assets/films/Temoin3extra.mp4"
+          loop
+          muted
+          playsinline
+          preload="auto"
+        ></video>
+      </a-assets>
+
+      <!-- Caméra -->
+      <a-entity camera look-controls="enabled: false" position="0 1.6 0">
+        <a-entity
+          id="cursor"
+          cursor="fuse:true; fuseTimeout:800"
+          raycaster="objects: .playable"
+          position="0 0 -1"
+          geometry="primitive:ring; radiusInner:0.02; radiusOuter:0.03"
+          material="color:#ff2222; shader:flat"
+        ></a-entity>
       </a-entity>
-    </a-entity>
+
+      <!-- Cible MindAR -->
       <a-entity mindar-image-target="targetIndex: 0">
-    <!-- Vidéo 1 : position ajustée selon l'export -->
-    <a-video
-      class="playable"
-      src="#video1"
-      width="0.9" height="1.6"        
-      position="0 1.58152 -2.98237"
-      rotation="0 -0.2131402997886663 0"
-      scale="1 1 1"
-      sequential-appear="index:0; delay:800; duration:600">
-    </a-video>
+        <!-- Vidéo 1 -->
+        <a-video
+          class="playable"
+          src="#video1"
+          width="0.9"
+          height="1.6"
+          position="0 1.58152 -2.98237"
+          rotation="0 -0.21314 0"
+          scale="1 1 1"
+          sequential-appear="index:0; delay:800; duration:600"
+        ></a-video>
 
-    <!-- Vidéo 2 : à droite, légèrement tournée vers le centre -->
-    <a-video
-      class="playable"
-      src="#video2"
-      width="0.9" height="1.6"
-      position="0.27256 1.566 -3.36963"
-      rotation="0 -56.470720288093936 0"
-      scale="1 1 1"
-      sequential-appear="index:1; delay:800; duration:600">
-    </a-video>
+        <!-- Vidéo 2 -->
+        <a-video
+          class="playable"
+          src="#video2"
+          width="0.9"
+          height="1.6"
+          position="0.27256 1.566 -3.36963"
+          rotation="0 -56.47 0"
+          scale="1 1 1"
+          sequential-appear="index:1; delay:800; duration:600"
+        ></a-video>
 
-    <!-- Vidéo 3 : à gauche, légèrement tournée vers le centre -->
-    <a-video
-      class="playable"
-      src="#video3"
-      width="0.9" height="1.6"
-      position="-0.26551 1.6 -3.40438"
-      rotation="0 58.131151978383066 0"
-      scale="1 1 1"
-      sequential-appear="index:2; delay:800; duration:600">
-    </a-video>
-</a-entity>
-    <!-- Lumière ambiante -->
-    <a-light type="ambient" intensity="0.5"></a-light>
-  </a-scene>
-</body>
+        <!-- Vidéo 3 -->
+        <a-video
+          class="playable"
+          src="#video3"
+          width="0.9"
+          height="1.6"
+          position="-0.26551 1.6 -3.40438"
+          rotation="0 58.13 0"
+          scale="1 1 1"
+          sequential-appear="index:2; delay:800; duration:600"
+        ></a-video>
+      </a-entity>
+
+      <!-- Lumière -->
+      <a-light type="ambient" intensity="0.5"></a-light>
+    </a-scene>
+  </body>
 </html>
